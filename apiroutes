@@ -1,1 +1,35 @@
+import AWS from 'aws-sdk';
+import { v4 as uuidv4 } from 'uuid';
+
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
+export const handler = async (event) => {
+    const { title, author, monthRead, yearRead, username } = JSON.parse(event.body);
+    const bookId = uuidv4();
+
+    const params = {
+        TableName: 'Books',
+        Item: {
+            bookId,
+            username,
+            title,
+            author,
+            monthRead,
+            yearRead,
+        },
+    };
+
+    try {
+        await dynamoDB.put(params).promise();
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ bookId, username, title, author, monthRead, yearRead }),
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'Error creating book', error }),
+        };
+    }
+};
 
